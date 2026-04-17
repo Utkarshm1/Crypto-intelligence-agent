@@ -42,6 +42,7 @@ Current wrapper endpoints:
 - `GET /trending`
 - `GET /market-summary`
 - `GET /trend?symbol=btc&days=7`
+- `GET /ohlc?symbol=btc&days=7`
 
 ### External Dependencies
 
@@ -103,4 +104,5 @@ The dashboard is intended to support interpretability and exploratory analysis, 
 - The wrapper includes short-term in-memory caching to reduce repeated upstream calls.
 - The wrapper and agent both enforce explicit timeouts to prevent indefinite waits.
 - Broad prompts such as “What should I look at in the market right now?” are constrained to a fast path for reliability.
+- The dashboard candlestick charts are rendered from normalized OHLC data and then compressed into a readable daily view on the frontend.
 - This is a local working prototype, not a production deployment.

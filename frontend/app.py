@@ -80,13 +80,37 @@ def render_trace(trace: list[dict]) -> None:
             st.json(step.get("result", {}))
 
 
-def fetch_json(path: str, *, params: dict | None = None) -> dict | None:
+def extract_error_message(payload: dict | None, fallback: str) -> str:
+    if not isinstance(payload, dict):
+        return fallback
+    detail = payload.get("detail")
+    if isinstance(detail, dict):
+        return detail.get("message", fallback)
+    if isinstance(detail, str):
+        return detail
+    if isinstance(payload.get("error"), str):
+        return payload["error"]
+    return fallback
+
+
+def fetch_json(path: str, *, params: dict | None = None) -> dict:
     try:
         response = requests.get(f"{MCP_URL}{path}", params=params, timeout=30)
-        response.raise_for_status()
-        return response.json()
+        payload = response.json()
+    except requests.Timeout:
+        return {"error": "The dashboard request timed out while waiting for live market data."}
+    except ValueError:
+        payload = {}
     except requests.RequestException:
-        return None
+        return {"error": "The dashboard could not reach the live market-data service."}
+    if not response.ok:
+        return {
+            "error": extract_error_message(
+                payload,
+                "The dashboard could not load live market data.",
+            )
+        }
+    return payload
 
 
 @st.cache_data(ttl=90, show_spinner=False)
@@ -222,8 +246,9 @@ def render_dashboard() -> None:
     summary = load_market_summary()
     trending = load_trending()
 
-    if not summary:
-        st.warning("Dashboard data is temporarily unavailable. The chat flow still works once backend services are up.")
+    if summary.get("error"):
+        st.warning(summary["error"])
+        st.caption("The chat flow can still work if the agent backend is available.")
         return
 
     top_left, top_mid, top_right = st.columns(3)
@@ -253,7 +278,7 @@ def render_dashboard() -> None:
             st.dataframe(table_rows, use_container_width=True, hide_index=True)
 
         st.markdown("**Trending Assets**")
-        trending_coins = trending.get("coins", []) if trending else []
+        trending_coins = trending.get("coins", []) if trending and not trending.get("error") else []
         if trending_coins:
             st.dataframe(
                 [
@@ -266,14 +291,18 @@ def render_dashboard() -> None:
                 use_container_width=True,
                 hide_index=True,
             )
+        elif trending and trending.get("error"):
+            st.caption(trending["error"])
 
     with trend_col:
         st.markdown("**7-Day Trend View**")
         trend_symbol = st.selectbox("Trend asset", COIN_OPTIONS, index=0, key="trend_symbol")
         ohlc_data = load_ohlc(trend_symbol, days=7)
-        if ohlc_data and ohlc_data.get("candles"):
+        if ohlc_data.get("candles"):
             render_candlestick_chart(ohlc_data["candles"], height=260)
             st.caption(f"{ohlc_data['name']} ({ohlc_data['symbol']}) candlestick view over the last {ohlc_data['days']} days")
+        elif ohlc_data.get("error"):
+            st.info(ohlc_data["error"])
         else:
             st.info("Candlestick data is unavailable for the selected asset.")
 
@@ -285,7 +314,7 @@ def render_dashboard() -> None:
         symbol2 = st.selectbox("Second asset", COIN_OPTIONS, index=COIN_OPTIONS.index(DEFAULT_COMPARE_2), key="compare_symbol2")
 
     compare_data = load_compare(symbol1, symbol2)
-    if compare_data:
+    if compare_data.get("coin_1") and compare_data.get("coin_2"):
         col_1, col_2 = st.columns(2)
         render_coin_snapshot(col_1, compare_data["coin_1"], "Asset One")
         render_coin_snapshot(col_2, compare_data["coin_2"], "Asset Two")
@@ -296,9 +325,15 @@ def render_dashboard() -> None:
         with trend_col_1:
             if trend_1 and trend_1.get("candles"):
                 render_candlestick_chart(trend_1["candles"], height=220)
+            elif trend_1.get("error"):
+                st.caption(trend_1["error"])
         with trend_col_2:
             if trend_2 and trend_2.get("candles"):
                 render_candlestick_chart(trend_2["candles"], height=220)
+            elif trend_2.get("error"):
+                st.caption(trend_2["error"])
+    elif compare_data.get("error"):
+        st.info(compare_data["error"])
 
 
 def handle_prompt_submission(prompt: str) -> None:

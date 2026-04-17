@@ -7,7 +7,7 @@ Crypto Intelligence Agent is a local agentic web application for exploratory cry
 - Real-time crypto price lookup through normalized wrapper endpoints
 - Side-by-side comparison for two assets
 - Trending coins and market summary views
-- Lightweight dashboard with top performers, comparison cards, and 7-day trend charts
+- Lightweight dashboard with top performers, comparison cards, and 7-day candlestick-style chart views
 - Tool trace / transparency panel showing tool used, input, and returned-data summary
 - Symbol normalization for common names and minor typos
 - Local Ollama support for fully local LLM orchestration
@@ -141,6 +141,7 @@ The dashboard is a visualization layer, not the reasoning engine. It uses the sa
 - Depends on CoinGecko free endpoints, which may rate-limit or respond slowly
 - No persistent database or long-term storage
 - Historical charting is intentionally lightweight
+- Dashboard chart views are derived from normalized OHLC market data and simplified for readability
 - Broad prompts are scoped for speed rather than maximum coverage
 - Wrapper caching is in-memory only and resets when the process restarts
 - Test coverage is lightweight and focused on planning and reliability helpers, not full integration coverage
