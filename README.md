@@ -109,7 +109,7 @@ Open the frontend at [http://127.0.0.1:8501](http://127.0.0.1:8501).
 
 ## Environment Variables
 
-Copy [.env.example](/Users/utkarshmishra/Documents/Playground/crypto-intelligence-agent/.env.example) to `.env` and configure:
+Copy [.env.example](.env.example) to `.env` and configure:
 
 - `LLM_BASE_URL`
   OpenAI-compatible endpoint for the local LLM server. Default: `http://localhost:11434/v1`
@@ -135,7 +135,7 @@ Note: broad market prompts are intentionally constrained to a smaller tool path 
 
 ## Dashboard
 
-The dashboard is a visualization layer, not the reasoning engine. It uses the same normalized MCP wrapper data to display tracked market metrics, top-performing assets, comparison views, and 7-day trend charts. The core reasoning flow still runs through the agent backend and its tool-calling logic.
+The dashboard is a visualization layer, not the reasoning engine. It uses the same normalized MCP wrapper data to display tracked market metrics, top-performing assets, comparison views, and 7-day candlestick-style charts. The core reasoning flow still runs through the agent backend and its tool-calling logic.
 
 ## Reliability / Known Limitations
 
