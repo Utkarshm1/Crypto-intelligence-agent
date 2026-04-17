@@ -2,6 +2,8 @@
 
 Crypto Intelligence Agent is a local agentic web application for exploratory crypto market analysis. It combines a local LLM with tool-calling, a FastAPI-based MCP-style wrapper for live market data, and a Streamlit interface with a lightweight decision-support dashboard. The project is designed to ground market answers in normalized live data rather than relying on model guesses.
 
+Demo video: [docs/demo/crypto-intelligence-agent-demo.mp4](/Users/utkarshmishra/Documents/Playground/crypto-intelligence-agent/docs/demo/crypto-intelligence-agent-demo.mp4)
+
 ## Key Features
 
 - Real-time crypto price lookup through normalized wrapper endpoints
